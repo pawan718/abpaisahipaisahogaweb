@@ -79,8 +79,8 @@ const Summary = () => {
 
       // Clear stored data after successful submit
       localStorage.removeItem('financeFormData');
-      alert('Data submitted successfully!');
-      navigate('/');
+      // Navigate to completion screen
+      navigate('/completion');
     } catch (err) {
       console.error('Submit failed:', err);
       setSubmitError(err.message || 'Failed to submit form');
@@ -94,7 +94,7 @@ const Summary = () => {
     <div className="summary-page">
       <div className="summary-container">
         <div className="summary-header">
-          <h1 className="summary-title">Finance Summary</h1>
+          <h1 className="summary-title">Expense Summary</h1>
         </div>
 
         <div className="summary-content">

@@ -28,7 +28,7 @@
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-.finance-banner-content {  []
+.finance-banner-content {
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
@@ -116,10 +116,50 @@
 }
 
 /* Responsive Design */
+/* Tablet */
+@media (max-width: 1024px) {
+  .finance-banner-content {
+    gap: 20px;
+  }
+
+  .finance-banner-left {
+    gap: 20px;
+  }
+
+  .finance-banner-icon {
+    font-size: 3rem;
+  }
+
+  .finance-banner-title {
+    font-size: 1.6rem;
+  }
+
+  .finance-banner-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .finance-banner-right {
+    gap: 15px;
+  }
+
+  .finance-banner-arrow {
+    font-size: 2.2rem;
+  }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
   .finance-banner {
     padding: 20px 15px;
     margin-top: 70px;
+    margin-bottom: 15px;
+  }
+
+  .finance-banner::before {
+    width: 200px;
+    height: 200px;
+    top: -30%;
+    right: -15%;
   }
 
   .finance-banner-content {
@@ -131,18 +171,25 @@
     flex-direction: column;
     text-align: center;
     gap: 15px;
+    width: 100%;
   }
 
   .finance-banner-icon {
     font-size: 3rem;
   }
 
+  .finance-banner-text {
+    width: 100%;
+  }
+
   .finance-banner-title {
     font-size: 1.4rem;
+    margin-bottom: 10px;
   }
 
   .finance-banner-subtitle {
     font-size: 0.9rem;
+    line-height: 1.6;
   }
 
   .finance-banner-right {
@@ -161,5 +208,103 @@
 
   .finance-banner-arrow {
     font-size: 2rem;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .finance-banner {
+    padding: 18px 12px;
+    margin-top: 60px;
+    margin-bottom: 12px;
+  }
+
+  .finance-banner::before {
+    width: 150px;
+    height: 150px;
+    top: -20%;
+    right: -20%;
+  }
+
+  .finance-banner-content {
+    gap: 18px;
+  }
+
+  .finance-banner-left {
+    gap: 12px;
+  }
+
+  .finance-banner-icon {
+    font-size: 2.5rem;
+  }
+
+  .finance-banner-title {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .finance-banner-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding: 0 8px;
+  }
+
+  .finance-banner-right {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .finance-banner-badge {
+    padding: 5px 14px;
+    border-radius: 20px;
+  }
+
+  .badge-text {
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+  }
+
+  .finance-banner-arrow {
+    font-size: 1.8rem;
+  }
+
+  .finance-banner:hover {
+    transform: translateY(0);
+  }
+
+  .finance-banner:hover .finance-banner-arrow {
+    transform: translateX(5px);
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 360px) {
+  .finance-banner {
+    padding: 15px 10px;
+  }
+
+  .finance-banner-title {
+    font-size: 1.1rem;
+  }
+
+  .finance-banner-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .finance-banner-icon {
+    font-size: 2.2rem;
+  }
+
+  .finance-banner-badge {
+    padding: 4px 12px;
+  }
+
+  .badge-text {
+    font-size: 0.7rem;
+  }
+
+  .finance-banner-arrow {
+    font-size: 1.6rem;
   }
 }

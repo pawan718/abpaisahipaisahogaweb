@@ -68,24 +68,20 @@ const Header = ({ isMenuOpen, setIsMenuOpen }) => {
       <div className="container">
         <div className="header-content">
           <div className="logo">
-            <h1>Ab Paisa Hi Paisa Hoga</h1>
+            <img
+              src="https://bbzjpkynmsxwjvzpidwn.supabase.co/storage/v1/object/public/offers_bucket/logos/logo%20(1).png"
+              alt="Ab Paisa Hi Paisa Hoga logo"
+              className="logo-image"
+            />
           </div>
           
-          <nav className={`nav ${isMenuOpen ? 'nav-open' : ''}`}>
-            <ul className="nav-list">
-              <li><a href="#home" className="nav-link">Home</a></li>
-              <li><a href="#features" className="nav-link">Features</a></li>
-              <li><a href="#offers" className="nav-link">Offers</a></li>
-              <li><a href="#about" className="nav-link">About</a></li>
-              <li><a href="#contact" className="nav-link">Contact</a></li>
-            </ul>
-          </nav>
           {/* Only show login button if user is not logged in */}
           {user === null ? (
             <button className="login-btn" onClick={() => navigate('/login')}>Login</button>
           ) : (
             <div 
               className="user-circle-container"
+              onClick={() => setShowLogout(!showLogout)}
               onMouseEnter={() => {
                 if (timeoutRef.current) {
                   clearTimeout(timeoutRef.current);
@@ -118,6 +114,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen }) => {
                       setShowLogout(false);
                     }, 200);
                   }}
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <div className="logout-user-info">
                     {getDisplayName()}
@@ -129,15 +126,6 @@ const Header = ({ isMenuOpen, setIsMenuOpen }) => {
               )}
             </div>
           )}
-          
-          <button 
-            className={`hamburger ${isMenuOpen ? 'active' : ''}`}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
         </div>
       </div>
     </header>

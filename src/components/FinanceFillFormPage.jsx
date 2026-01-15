@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './FinanceFillFormPage.css';
 
@@ -10,7 +10,6 @@ const FinanceFillFormPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [debugLog, setDebugLog] = useState([]);
   const [expandedCategoryId, setExpandedCategoryId] = useState(null);
   const [expandedSubcategoryId, setExpandedSubcategoryId] = useState(null);
   const [completedCategories, setCompletedCategories] = useState(new Set());
@@ -62,13 +61,6 @@ const FinanceFillFormPage = () => {
     }
   }, [expandedSubcategoryId]);
 
-  const appendLog = (title, details) => {
-    setDebugLog((prev) => {
-      const next = [`${new Date().toISOString()} | ${title}: ${details}`, ...prev];
-      return next.slice(0, 50);
-    });
-  };
-
   const fetchCategories = async () => {
     const apiUrl = `https://bbzjpkynmsxwjvzpidwn.supabase.co/functions/v1/get_categories`;
     const method = 'GET';
@@ -79,79 +71,30 @@ const FinanceFillFormPage = () => {
     try {
       setLoading(true);
       setError('');
-      appendLog('REQUEST', `${method} ${apiUrl}`);
-      
-      // Log request details
-      console.log('========== API REQUEST START ==========');
-      console.log('Timestamp:', new Date().toISOString());
-      console.log('API URL:', apiUrl);
-      console.log('Method:', method);
-      console.log('Request Headers:', {
-        'Content-Type': requestHeaders['Content-Type'],
-        'Authorization': requestHeaders['Authorization'] ? 'Bearer [REDACTED]' : 'Not set',
-        'apikey': requestHeaders['apikey'] ? '[REDACTED]' : 'Not set',
-      });
-      console.log('========================================');
       const response = await fetch(apiUrl);
-      console.log(response);
       if (!response.ok) {
         let errorText = '';
         let errorJson = null;
         
         try {
-          // Try to get response as text first
           errorText = await response.clone().text();
-          console.log('========== API ERROR RESPONSE BODY ==========');
-          console.log('Error Response Text:', errorText);
-          
-          // Try to parse as JSON
           try {
             errorJson = JSON.parse(errorText);
-            console.log('Error Response JSON:', JSON.stringify(errorJson, null, 2));
           } catch (jsonError) {
-            console.log('Error Response is not valid JSON');
+            // Not valid JSON
           }
-          console.log('==============================================');
         } catch (e) {
-          console.error('========== ERROR READING RESPONSE ==========');
-          console.error('Could not read error response:', e);
-          console.error('Error details:', {
-            name: e.name,
-            message: e.message,
-            stack: e.stack,
-          });
-          console.error('=============================================');
+          // Could not read error response
         }
         
-        // Log detailed error information
-        console.error('========== API ERROR DETAILS ==========');
-        console.error('Status Code:', response.status);
-        console.error('Status Text:', response.statusText);
-        console.error('Error Text:', errorText);
-        console.error('Error JSON:', errorJson);
-        console.error('Response Headers:', Object.fromEntries(response.headers.entries()));
-        console.error('Request URL:', apiUrl);
-        console.error('Request Method:', method);
-        console.error('========================================');
-        
-        // Provide more specific error messages
         if (response.status === 401 || response.status === 403) {
-          const authError = 'Authentication failed. Please check API credentials.';
-          console.error('Authentication Error:', authError);
-          throw new Error(authError);
+          throw new Error('Authentication failed. Please check API credentials.');
         } else if (response.status === 404) {
-          const notFoundError = 'API endpoint not found. Please verify the endpoint URL.';
-          console.error('Not Found Error:', notFoundError);
-          throw new Error(notFoundError);
+          throw new Error('API endpoint not found. Please verify the endpoint URL.');
         } else if (response.status >= 500) {
-          const serverError = 'Server error. Please try again later.';
-          console.error('Server Error:', serverError);
-          throw new Error(serverError);
+          throw new Error('Server error. Please try again later.');
         } else {
-          const genericError = `Failed to fetch categories: ${response.status} ${response.statusText}`;
-          console.error('Generic Error:', genericError);
-          appendLog('ERROR', `${genericError} | ${errorText || 'No body returned'}`);
-          throw new Error(genericError);
+          throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText}`);
         }
       }
       
@@ -159,92 +102,41 @@ const FinanceFillFormPage = () => {
       let data;
       try {
         const responseText = await response.text();
-        console.log('========== API SUCCESS RESPONSE ==========');
-        console.log('Response Text:', responseText);
-        
         try {
           data = JSON.parse(responseText);
-          console.log('Parsed JSON Data:', JSON.stringify(data, null, 2));
         } catch (parseError) {
-          console.error('Failed to parse JSON:', parseError);
           throw new Error('Invalid JSON response from API');
         }
-        console.log('==========================================');
       } catch (parseError) {
-        console.error('========== JSON PARSE ERROR ==========');
-        console.error('Parse Error:', parseError);
-        console.error('Response Text:', await response.text());
-        console.error('======================================');
         throw parseError;
       }
-      
-      console.log('========== PROCESSING CATEGORIES ==========');
-      console.log('Raw Data:', data);
-      console.log('Is Array:', Array.isArray(data));
-      console.log('Has categories property:', data.categories !== undefined);
-      console.log('Has data property:', data.data !== undefined);
-      console.log('============================================');
       
       // Handle both direct array and object with categories property
       let categoriesToSet = [];
       if (Array.isArray(data)) {
-        console.log('Using data as direct array. Count:', data.length);
         categoriesToSet = data;
       } else if (data.categories && Array.isArray(data.categories)) {
-        console.log('Using data.categories array. Count:', data.categories.length);
         categoriesToSet = data.categories;
       } else if (data.data && Array.isArray(data.data)) {
-        console.log('Using data.data array. Count:', data.data.length);
         categoriesToSet = data.data;
       } else {
-        console.error('========== UNEXPECTED DATA FORMAT ==========');
-        console.error('Data:', JSON.stringify(data, null, 2));
-        console.error('Data Type:', typeof data);
-        console.error('Data Keys:', Object.keys(data || {}));
-        console.error('============================================');
-        appendLog('ERROR', 'Invalid data format received from API');
         throw new Error('Invalid data format received from API');
       }
       
       setCategories(categoriesToSet);
       
-      console.log('========== API REQUEST SUCCESS ==========');
-      console.log('Categories loaded successfully. Count:', categoriesToSet.length);
-      console.log('==========================================');
-      appendLog('SUCCESS', `Loaded ${categoriesToSet.length} categories`);
-      
     } catch (err) {
-      // Log comprehensive error information
-      console.error('========== COMPREHENSIVE ERROR LOG ==========');
-      console.error('Error Name:', err.name);
-      console.error('Error Message:', err.message);
-      console.error('Error Stack:', err.stack);
-      console.error('Error Type:', typeof err);
-      console.error('Error Constructor:', err.constructor?.name);
-      console.error('Timestamp:', new Date().toISOString());
-      console.error('API URL:', apiUrl);
-      console.error('===========================================');
-      
       // Handle network errors specifically
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
-        console.error('Network Error Detected');
-        appendLog('NETWORK ERROR', err.message);
         setError('Network error. Please check your internet connection.');
       } else if (err.name === 'SyntaxError') {
-        console.error('JSON Parse Error Detected');
-        appendLog('PARSE ERROR', err.message);
         setError('Invalid response format from server.');
       } else {
         const errorMessage = err.message || 'Failed to load categories. Please try again later.';
-        console.error('Generic Error:', errorMessage);
-        appendLog('ERROR', errorMessage);
         setError(errorMessage);
       }
     } finally {
       setLoading(false);
-      console.log('========== API REQUEST COMPLETED ==========');
-      console.log('Loading state set to false');
-      console.log('===========================================');
     }
   };
 
@@ -345,8 +237,6 @@ const FinanceFillFormPage = () => {
       }
     });
 
-    console.log('Final submission:', allSubmissions);
-    
     // Store the submission data in localStorage or state management
     localStorage.setItem('financeFormData', JSON.stringify(allSubmissions));
     
@@ -360,12 +250,9 @@ const FinanceFillFormPage = () => {
 
   if (loading) {
     return (
-      <div className="finance-form-page">
-        <div className="finance-form-container">
-          <div className="loading-spinner">
-            <div className="spinner"></div>
-            <p>Loading categories...</p>
-          </div>
+      <div className="loading-spinner">
+        <div className="loader-wrapper">
+          <div className="circle-loader"></div>
         </div>
       </div>
     );
@@ -379,7 +266,7 @@ const FinanceFillFormPage = () => {
             <button onClick={handleBack} className="back-btn">
               ← Back
             </button>
-            <h1 className="finance-form-title">Finance Details Form</h1>
+            <h1 className="finance-form-title">Expense Details Form</h1>
           </div>
           <div className="error-message">
             <div className="error-icon">⚠️</div>
@@ -389,18 +276,6 @@ const FinanceFillFormPage = () => {
               Retry
             </button>
           </div>
-          {debugLog.length > 0 && (
-            <div className="debug-panel">
-              <div className="debug-panel-title">Debug Logs (latest first)</div>
-              <div className="debug-panel-body">
-                {debugLog.map((log, idx) => (
-                  <div key={idx} className="debug-line">
-                    {log}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -413,7 +288,7 @@ const FinanceFillFormPage = () => {
           <button onClick={handleBack} className="back-btn">
             ← Back
           </button>
-          <h1 className="finance-form-title">Finance Details Form</h1>
+          <h1 className="finance-form-title">Expense Details Form</h1>
         </div>
 
         {/* Progress Indicator */}
@@ -496,11 +371,9 @@ const FinanceFillFormPage = () => {
                           if (subcat.colors && Array.isArray(subcat.colors) && subcat.colors.length >= 2) {
                             // Backend provides two colors, create gradient
                             subGradient = `linear-gradient(135deg, ${subcat.colors[0]} 0%, ${subcat.colors[1]} 100%)`;
-                            console.log(`✓ Using backend colors for "${subcat.name}":`, subcat.colors, '→', subGradient);
                           } else {
                             // Fallback to hardcoded gradients
                             subGradient = subcategoryGradients[subIndex % subcategoryGradients.length];
-                            console.log(`✗ Using fallback for "${subcat.name}" - Backend colors:`, subcat.colors);
                           }
                           
                           const key = `${category.id}-${subcat.id}`;
@@ -630,19 +503,6 @@ const FinanceFillFormPage = () => {
           );
         })()}
       </div>
-
-      {debugLog.length > 0 && (
-        <div className="debug-panel">
-          <div className="debug-panel-title">Debug Logs (latest first)</div>
-          <div className="debug-panel-body">
-            {debugLog.map((log, idx) => (
-              <div key={idx} className="debug-line">
-                {log}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

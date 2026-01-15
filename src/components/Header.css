@@ -14,6 +14,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 0;
+  position: relative;
 }
 
 .logo h1 {
@@ -24,6 +25,12 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 0;
+}
+
+.logo-image {
+  height: 50px;
+  width: 100px;
+  display: block;
 }
 
 .nav-list {
@@ -198,41 +205,48 @@
 }
 
 @media (max-width: 768px) {
-  .nav {
-    position: fixed;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-100%);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+  .header-content {
+    justify-content: space-between;
   }
-  
-  .nav-open {
-    transform: translateY(0);
-    opacity: 1;
-    visibility: visible;
-  }
-  
-  .nav-list {
-    flex-direction: column;
-    padding: 2rem;
-    gap: 1rem;
-  }
-  
+
   .hamburger {
-    display: flex;
+    display: none !important;
   }
 
   .user-circle-container {
-    margin-left: 1rem;
+    margin-left: 0;
+    position: absolute;
+    right: 0;
+  }
+
+  .login-btn {
+    margin-left: 0;
+    padding: 6px 18px;
+    font-size: 0.9rem;
+    position: absolute;
+    right: 0;
+  }
+
+  .user-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
   }
 
   .logout-dropdown {
     right: 0;
     min-width: 140px;
+    position: absolute;
+    top: calc(100% + 8px);
+    z-index: 1002;
+  }
+  
+  .user-circle-container {
+    position: relative;
+  }
+  
+  .logo-image {
+    height: 40px;
+    width: 90px;
   }
 } 

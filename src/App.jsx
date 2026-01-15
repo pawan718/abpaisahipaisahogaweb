@@ -12,15 +12,17 @@ import SignUp from './components/SignUp.jsx';
 import FinanceBanner from './components/FinanceBanner.jsx';
 import FinanceFillFormPage from './components/FinanceFillFormPage.jsx';
 import Summary from './components/Summary.jsx';
+import OfferDetail from './components/OfferDetail.jsx';
+import CompletionScreen from './components/CompletionScreen.jsx';
 
 function HomePage({ isMenuOpen, setIsMenuOpen }) {
   return (
     <>
       <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
       <main>
+        <Hero />
         <FinanceBanner />
         <DealsOfTheDay />
-        <Hero />
         <Offers />
         <Features />
       </main>
@@ -40,6 +42,8 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/finance-fill-form" element={<FinanceFillFormPage />} />
           <Route path="/summary" element={<Summary />} />
+          <Route path="/completion" element={<CompletionScreen />} />
+          <Route path="/offer/:offerId" element={<OfferDetail />} />
           <Route path="/" element={<HomePage isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />} />
         </Routes>
       </div>

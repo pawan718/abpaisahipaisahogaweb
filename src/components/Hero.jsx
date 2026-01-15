@@ -1,105 +1,119 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Hero.css';
+import { fetchBannerOffers, fetchSpecialOffers } from '../services/offerService.js';
 
 const Hero = () => {
-  // Banner data array
-  const banners = [
-    {
-      brand: "koparo clean",
-      promoTitle: "Up To 50% OFF Sitewide",
-      mainOffer: "FLAT 40% CASHBACK",
-      extraOffer: "EXTRA 30% COUPON OFF",
-      products: [
-        { icon: "🧴", name: "koparo clean FLOOR CLEANER" },
-        { icon: "🧼", name: "koparo LIQUID DETERGENT" },
-        { icon: "🍋", name: "koparo DISHWASH LIQUID" },
-      ]
-    },
-    {
-      brand: "koparo fresh",
-      promoTitle: "Buy 1 Get 1 Free",
-      mainOffer: "BOGO OFFER",
-      extraOffer: "EXTRA 20% OFF",
-      products: [
-        { icon: "🧽", name: "koparo MULTI-PURPOSE CLEANER" },
-        { icon: "🪣", name: "koparo BATHROOM CLEANER" },
-        { icon: "🧻", name: "koparo TOILET CLEANER" },
-      ]
-    },
-    {
-      brand: "koparo shine",
-      promoTitle: "Free Delivery on Orders Above ₹499",
-      mainOffer: "FREE DELIVERY",
-      extraOffer: "EXTRA 10% CASHBACK",
-      products: [
-        { icon: "🧊", name: "koparo GLASS CLEANER" },
-        { icon: "🪟", name: "koparo WINDOW CLEANER" },
-        { icon: "🫧", name: "koparo HANDWASH" },
-      ]
-    },
-    {
-      brand: "koparo kids",
-      promoTitle: "Student Discount",
-      mainOffer: "EXTRA 15% OFF",
-      extraOffer: "FIRST ORDER BONUS ₹100",
-      products: [
-        { icon: "🧸", name: "koparo TOY CLEANER" },
-        { icon: "🍼", name: "koparo BOTTLE CLEANER" },
-        { icon: "🧃", name: "koparo JUICE CLEANER" },
-      ]
-    }
-  ];
+  const navigate = useNavigate();
+  const bannerScrollRef = useRef(null);
+  const [banners, setBanners] = useState([]);
+  const [scrollableOffers, setScrollableOffers] = useState([]);
+  const [bannersLoading, setBannersLoading] = useState(true);
+  const [offersLoading, setOffersLoading] = useState(true);
+  const [bannersError, setBannersError] = useState(null);
+  const [offersError, setOffersError] = useState(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const scrollableOffers = [
-    {
-      id: 1,
-      title: "Flash Sale - 70% OFF",
-      description: "Limited time offer on electronics",
-      discount: "70%",
-      image: "⚡",
-      color: "red"
-    },
-    {
-      id: 2,
-      title: "Buy 2 Get 1 Free",
-      description: "On all fashion items",
-      discount: "B2G1",
-      image: "👕",
-      color: "blue"
-    },
-    {
-      id: 3,
-      title: "Free Delivery",
-      description: "On orders above ₹499",
-      discount: "FREE",
-      image: "🚚",
-      color: "green"
-    },
-    {
-      id: 4,
-      title: "Cashback Up to ₹500",
-      description: "Use code CASHBACK",
-      discount: "₹500",
-      image: "💰",
-      color: "purple"
-    },
-    {
-      id: 5,
-      title: "Student Discount",
-      description: "Extra 10% off for students",
-      discount: "10%",
-      image: "🎓",
-      color: "orange"
-    },
-    {
-      id: 6,
-      title: "First Order Bonus",
-      description: "Get ₹100 off on first order",
-      discount: "₹100",
-      image: "🎁",
-      color: "pink"
+  const handleOfferClick = (offer) => {
+    // Navigate to offer detail page (redirection will happen there)
+    // Store offer data in localStorage for quick access in detail page
+    localStorage.setItem(`offer_${offer.id}`, JSON.stringify(offer.toMap ? offer.toMap() : offer));
+    navigate(`/offer/${offer.id}`);
+  };
+
+  useEffect(() => {
+    const loadBanners = async () => {
+      try {
+        setBannersLoading(true);
+        setBannersError(null);
+        const offers = await fetchBannerOffers();
+        setBanners(offers);
+      } catch (err) {
+        console.error('Error loading banners:', err);
+        setBannersError(err.message);
+        setBanners([]);
+      } finally {
+        setBannersLoading(false);
+      }
+    };
+
+    loadBanners();
+  }, []);
+
+  useEffect(() => {
+    const loadSpecialOffers = async () => {
+      try {
+        setOffersLoading(true);
+        setOffersError(null);
+        const offers = await fetchSpecialOffers();
+        setScrollableOffers(offers);
+      } catch (err) {
+        console.error('Error loading special offers:', err);
+        setOffersError(err.message);
+        setScrollableOffers([]);
+      } finally {
+        setOffersLoading(false);
+      }
+    };
+
+    loadSpecialOffers();
+  }, []);
+
+  const checkScrollButtons = () => {
+    if (bannerScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = bannerScrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
     }
-  ];
+  };
+
+  const scrollBanners = (direction) => {
+    if (bannerScrollRef.current) {
+      const scrollAmount = bannerScrollRef.current.clientWidth;
+      const currentScroll = bannerScrollRef.current.scrollLeft;
+      const targetScroll = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      bannerScrollRef.current.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+      
+      // Check buttons after scroll
+      setTimeout(checkScrollButtons, 300);
+    }
+  };
+
+  useEffect(() => {
+    // Initial check
+    checkScrollButtons();
+    
+    // Re-check after a short delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      checkScrollButtons();
+    }, 100);
+    
+    const scrollContainer = bannerScrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', checkScrollButtons);
+      
+      // Also check on window resize
+      const handleResize = () => {
+        setTimeout(checkScrollButtons, 100);
+      };
+      window.addEventListener('resize', handleResize);
+      
+      return () => {
+        scrollContainer.removeEventListener('scroll', checkScrollButtons);
+        window.removeEventListener('resize', handleResize);
+        clearTimeout(timeoutId);
+      };
+    }
+    
+    return () => clearTimeout(timeoutId);
+  }, [banners]);
 
   const getOfferColor = (color) => {
     const colorMap = {
@@ -116,64 +130,172 @@ const Hero = () => {
   return (
     <section id="home" className="hero">
       <div className="container">
-        <div className="hero-content">
-          {/* Left - Promotional Banner */}
-          <div className="hero-banners-scroll">
-            {banners.map((banner, idx) => (
-              <div className="hero-banner" key={idx}>
-                <div className="banner-content">
-                  <div className="brand-logo">{banner.brand}</div>
-                  <div className="promo-text">
-                    <h2 className="promo-title">{banner.promoTitle}</h2>
-                    <div className="main-offer">{banner.mainOffer}</div>
-                    <div className="extra-offer">{banner.extraOffer}</div>
+        {/* Top Section with Banner Offers and Special Offers */}
+        <div className="offers-top-section">
+          {/* Banner Offers */}
+          <div className="banner-offers-section">
+            {banners.length > 1 && (
+              <>
+                <button 
+                  className="banner-nav-btn banner-nav-left"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    scrollBanners('left');
+                  }}
+                  style={{ 
+                    opacity: canScrollLeft ? 1 : 0.5,
+                    pointerEvents: canScrollLeft ? 'auto' : 'none'
+                  }}
+                  aria-label="Previous banner"
+                  disabled={!canScrollLeft}
+                >
+                  ←
+                </button>
+                <button 
+                  className="banner-nav-btn banner-nav-right"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    scrollBanners('right');
+                  }}
+                  style={{ 
+                    opacity: canScrollRight ? 1 : 0.5,
+                    pointerEvents: canScrollRight ? 'auto' : 'none'
+                  }}
+                  aria-label="Next banner"
+                  disabled={!canScrollRight}
+                >
+                  →
+                </button>
+              </>
+            )}
+            <div className="hero-banners-scroll" ref={bannerScrollRef}>
+              {bannersLoading ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#718096' }}>
+                  Loading banners...
+                </div>
+              ) : bannersError ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#e53e3e' }}>
+                  Error loading banners: {bannersError}
+                </div>
+              ) : banners.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#718096' }}>
+                  No banners available at the moment.
+                </div>
+              ) : (
+                banners.map((banner, idx) => (
+                  <div 
+                    className="hero-banner" 
+                    key={banner.id || idx}
+                    style={{ cursor: 'pointer', position: 'relative' }}
+                    onClick={() => handleOfferClick(banner)}
+                  >
+                    {banner.bannerImage ? (
+                      <div className="banner-image-container">
+                        <img 
+                          src={banner.bannerImage} 
+                          alt={banner.title || 'Banner offer'}
+                          className="banner-image"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="banner-content">
+                        <div className="brand-logo">{banner.brand}</div>
+                        <div className="promo-text">
+                          <h2 className="promo-title">{banner.title}</h2>
+                          <div className="main-offer">{banner.shortDescription}</div>
+                        </div>
+                        <button 
+                          className="shop-now-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOfferClick(banner);
+                          }}
+                        >
+                          SHOP NOW
+                        </button>
+                      </div>
+                    )}
+                    {!banner.bannerImage && banner.offerScreenshots && banner.offerScreenshots.length > 0 && (
+                      <div className="banner-products">
+                        {banner.offerScreenshots.slice(0, 3).map((screenshot, pidx) => (
+                          <div className="product-item" key={pidx}>
+                            <div className="product-icon">
+                              <img 
+                                src={screenshot} 
+                                alt={`${banner.brand} product ${pidx + 1}`}
+                                style={{ width: '100%', height: '100%', maxWidth: '40px', maxHeight: '40px', objectFit: 'contain' }}
+                              />
+                            </div>
+                            <div className="product-name">{banner.brand}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <button className="shop-now-btn">SHOP NOW</button>
-                </div>
-                <div className="banner-products">
-                  {banner.products.map((product, pidx) => (
-                    <div className="product-item" key={pidx}>
-                      <div className="product-icon">{product.icon}</div>
-                      <div className="product-name">{product.name}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+                ))
+              )}
+            </div>
           </div>
           
-          {/* Right - Special Offers Sidebar */}
-          <div className="special-offers-sidebar">
-            {/* Scrollable Offers Widget */}
+          {/* Special Offers */}
+          <div className="special-offers-section">
             <div className="offers-widget">
               <div className="widget-header">
                 <h3>Special Offers</h3>
                 <span className="scroll-indicator">↕️</span>
               </div>
               <div className="offers-scroll-container">
-                <div className="offers-list">
-                  {scrollableOffers.map((offer) => {
-                    const colors = getOfferColor(offer.color);
-                    return (
-                      <div 
-                        key={offer.id} 
-                        className="offer-item"
-                        style={{ background: colors.bg }}
-                      >
-                        <div className="offer-icon">{offer.image}</div>
-                        <div className="offer-content">
-                          <h4 className="offer-title" style={{ color: colors.text }}>
-                            {offer.title}
-                          </h4>
-                          <p className="offer-description">{offer.description}</p>
-                          <div className="offer-discount" style={{ color: colors.text }}>
-                            {offer.discount}
-                          </div>
-                        </div>
+                {offersLoading ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#718096' }}>
+                    Loading offers...
+                  </div>
+                ) : offersError ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#e53e3e' }}>
+                    Error: {offersError}
+                  </div>
+                ) : (
+                  <div className="offers-list">
+                    {scrollableOffers.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '20px', color: '#718096' }}>
+                        No special offers available.
                       </div>
-                    );
-                  })}
-                </div>
+                    ) : (
+                      scrollableOffers.map((offer, index) => {
+                        const colorIndex = index % 6;
+                        const colorKeys = ['red', 'blue', 'green', 'purple', 'orange', 'pink'];
+                        const colors = getOfferColor(colorKeys[colorIndex]);
+                        return (
+                          <div 
+                            key={offer.id} 
+                            className="offer-item"
+                            style={{ background: colors.bg, cursor: 'pointer' }}
+                            onClick={() => handleOfferClick(offer)}
+                          >
+                            <div className="offer-icon">
+                              {offer.brandLogo ? (
+                                <img 
+                                  src={offer.brandLogo} 
+                                  alt={offer.brand}
+                                />
+                              ) : (
+                                '🛒'
+                              )}
+                            </div>
+                            <div className="offer-content">
+                              <h4 className="offer-title" style={{ color: colors.text }}>
+                                {offer.title}
+                              </h4>
+                              <p className="offer-description">{offer.shortDescription}</p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

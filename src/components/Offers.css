@@ -137,6 +137,40 @@
   left: 100%;
 }
 
+.coming-soon-card {
+  filter: blur(3px);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.coming-soon-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 20px;
+  backdrop-filter: blur(2px);
+}
+
+.coming-soon-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: white;
+  padding: 15px 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+  border: 3px solid #667eea;
+}
+
 .offer-badges {
   display: flex;
   justify-content: space-between;

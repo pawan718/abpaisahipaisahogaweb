@@ -29,7 +29,7 @@ const Offers = () => {
     },
     {
       id: 3,
-      title: "5-Inch Self-Watering Pot (Set of 5)",
+      title: "Self-Watering Pot (Set)",
       subtitle: "At Just Rs.36 Each",
       time: "2 hours ago",
       originalPrice: "₹2430",
@@ -139,13 +139,17 @@ const Offers = () => {
         </div>
         
         <div className="offers-grid">
-          {offers.map((offer) => (
+          {offers.slice(0, 3).map((offer) => (
             <div 
               key={offer.id} 
-              className="offer-card" 
+              className="offer-card coming-soon-card" 
               data-category={offer.category}
               style={{ animationDelay: offer.animationDelay }}
             >
+              <div className="coming-soon-overlay">
+                <span className="coming-soon-text">Coming Soon</span>
+              </div>
+              
               <div className="offer-badges">
                 <div className="cashback-badge">Cashback</div>
                 <div className="question-badge">?</div>

@@ -15,9 +15,9 @@ const FinanceBanner = () => {
         <div className="finance-banner-left">
           <div className="finance-banner-icon">💳</div>
           <div className="finance-banner-text">
-            <h3 className="finance-banner-title">Get Free Finance Assistance & Save Money</h3>
+            <h3 className="finance-banner-title">Get Free Expense Management & Save Money</h3>
             <p className="finance-banner-subtitle">
-              Discover the best credit cards for maximum cashback • Manage expenses smartly • Save more with expert tips
+              Track your expenses • Get expert consultation • Save more with personalized tips
             </p>
           </div>
         </div>
